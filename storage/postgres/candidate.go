@@ -1,2 +1,81 @@
 package postgres
 
+import (
+	"database/sql"
+	v "root/genprotos/election"
+	cn "root/genprotos/candidate"
+
+	"github.com/google/uuid"
+)
+
+type CandidateStorage struct {
+	db *sql.DB
+}
+
+func NewCandidateStorage(db *sql.DB) *CandidateStorage {
+	return &CandidateStorage{db: db}
+}
+
+func (p *CandidateStorage) CreateCandidate(cn *cn.Candidate) (*v.Void, error) {
+	id := uuid.NewString()
+	query := `
+		INSERT INTO candidate (id, election_id, party_id, public_id, date)
+		VALUES ($1, $2, $3, $4, $5)
+	`
+	_, err := p.db.Exec(query, id, cn.Election, cn.Public, cn.Party, cn.Date)
+	return nil, err
+}
+
+func (p *CandidateStorage) GetByIdCandidate(id *v.ById) (*cn.Candidate, error) {
+		query := `
+			SELECT id, election_id, party_id, public_id, date
+			FROM candidate
+			WHERE id = $1
+		`
+		row := p.db.QueryRow(query, id.Id)
+
+		var can cn.Candidate
+		err := row.Scan(&can.Election,
+			&can.Party,
+			&can.Public)
+		if err != nil {
+			return nil, err
+		}
+
+		return &can, nil
+}
+
+func (p *CandidateStorage) GetAllCandidate(*v.Void) (*cn.GetAllCandidate, error) {
+	cans := &cn.GetAllCandidate{}
+	row, err := p.db.Query("select id, election_id, party_id, public_id, date from candidate")
+	if err != nil {
+		return nil, err
+	}
+	for row.Next() {
+		can := &cn.Candidate{}
+		err = row.Scan(&can.Election, &can.Party, &can.Public)
+		if err != nil {
+			return nil, err
+		}
+		cans.Candidates=append(cans.Candidates, can)
+	}
+	return cans, nil
+}
+
+func (p *CandidateStorage) UpdateCandidate(cn *cn.Candidate) (*v.Void, error) {
+	query := `
+		UPDATE candidate
+		SET election_id=$1, party_id=$2, public_id=$3, date=$4
+		WHERE id = $5
+	`
+	_, err := p.db.Exec(query,  cn.Election, cn.Party, cn.Public)
+	return nil, err
+}
+
+func (p *CandidateStorage) Delete(id *v.ById) (*v.Void, error) {
+	query := `
+		delete from candidate where id = $1
+	`
+	_, err := p.db.Exec(query, id.Id)
+	return nil, err
+}

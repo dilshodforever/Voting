@@ -2,46 +2,80 @@ package postgres
 
 import (
 	"database/sql"
-	"github.com/google/uuid"
-	pr "root/genprotos/product"
-	
+	v "root/genprotos/election"
+	pb "root/genprotos/vote"
 
+	"github.com/google/uuid"
 )
 
-type ProductStorage struct {
-	Db *sql.DB
+type VoteStorage struct {
+	db *sql.DB
 }
 
-func NewProductStorage(db *sql.DB) *ProductStorage {
-	return &ProductStorage{Db: db}
-}    
-
-
-func (bc *ProductStorage) CreateProduct(pr *pr.ProductCreateReq) (*pr.Void,error){
-	id:=uuid.NewString()
-	_, err:=bc.Db.Exec(`insert into products(id, name, price, category_id,expired_at) 
-						values($1, $2, $3, $4, $5)`,
-						id, pr.Name, pr.Price, pr.CategoryId, pr.ExpiredAt)
-	return nil,err
+func NewVoteStorage(db *sql.DB) *VoteStorage {
+	return &VoteStorage{db: db}
 }
 
+func (v *VoteStorage) CreateVote(vote *pb.Vote) (*v.Void, error) {
+	id := uuid.NewString()
+	query := `
+		INSERT INTO vote (id, candidate_id, data)
+		VALUES ($1, $2, $3)
+	`
+	_, err := v.db.Exec(query, id, vote.Candidate.Id, vote.Date)
+	return nil, err
+}
 
+func (v *VoteStorage) GetByIdVote(id *v.ById) (*pb.Vote, error) {
+	query := `
+			SELECT id, candidate_id, data
+			FROM vote
+			WHERE id = $1
+		`
+	row := v.db.QueryRow(query, id.Id)
 
-func (bc *ProductStorage) GetAllProduct(p *pr.Filter) (*pr.ProductGetAllResp,error){
-	product:=pr.ProductGetAllResp{}
-	row, err:=bc.Db.Query(`select name, price, expered_at from products`)
-	if err!=nil{
+	var vote pb.Vote
+	err := row.Scan(&vote.Id,
+		&vote.Candidate.Id,
+		&vote.Date)
+	if err != nil {
 		return nil, err
 	}
-	for row.Next(){
-		all:=pr.ProductGetAllResp{}
-		row.Scan(&all.Products[0].Name,
-				 &all.Products[0].Price,
-				 &all.Products[0].ExpiredAt)
-				 product.Products=append(product.Products, all.Products[0])
-	}
 
-	return &product,err
+	return &vote, nil
 }
 
+func (v *VoteStorage) GetAllVote(_ *v.Void) (*pb.GetAllVote, error) {
+	votes := &pb.GetAllVote{}
+	row, err := v.db.Query("select id, candidate_id, data from vote")
+	if err != nil {
+		return nil, err
+	}
+	for row.Next() {
+		vote := &pb.Vote{}
+		err = row.Scan(&vote.Id, &vote.Candidate.Id, &vote.Date)
+		if err != nil {
+			return nil, err
+		}
+		votes.Votes = append(votes.Votes, vote)
+	}
+	return votes, nil
+}
 
+func (p *VoteStorage) UpdateVote(vote *pb.Vote) (*v.Void, error) {
+	query := `
+		UPDATE Vote_
+		SET candidate_id = $2, data = $3
+		WHERE id = $1 
+	`
+	_, err := p.db.Exec(query, vote.Id, vote.Candidate.Id, vote.Date)
+	return nil, err
+}
+
+func (v *VoteStorage) DeleteVote(id *v.ById) (*v.Void, error) {
+	query := `
+		delete from vote where id = $1
+	`
+	_, err := v.db.Exec(query, id.Id)
+	return nil, err
+}

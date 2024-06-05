@@ -28,8 +28,8 @@ func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*v.Void, err
 
 func (p *PublicVoteStorage) GetByIdPublicVote(id *v.ById) (*pb.PublicVote, error) {
 		query := `
-			SELECT id, name
-			FROM public_vote, election_id, public_id
+			SELECT id, election_id, public_id
+			FROM public_vote
 			WHERE id = $1
 		`
 		row := p.db.QueryRow(query, id.Id)
@@ -72,7 +72,7 @@ func (p *PublicVoteStorage) UpdatePublicVote(pVote *pb.PublicVote) (*v.Void, err
 	return nil, err
 }
 
-func (p *PublicVoteStorage) Delete(id *v.ById) (*v.Void, error) {
+func (p *PublicVoteStorage) DeletePublicVote(id *v.ById) (*v.Void, error) {
 	query := `
 		delete from public_vote where id = $1
 	`

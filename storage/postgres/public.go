@@ -19,62 +19,66 @@ func NewPublicStorage(db *sql.DB) *PublicStorage {
 func (p *PublicStorage) CreatePublic(pub *pb.Public) (*v.Void, error) {
 	id := uuid.NewString()
 	query := `
-		INSERT INTO public_ (id, election_id, public_id)
-		VALUES ($1, $2, $3)
+		INSERT INTO public (id, first_name, last_name, birthday, gender, nation, party_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
-	_, err := p.db.Exec(query, id, p.Election.Id, p.Public.Id)
+	_, err := p.db.Exec(query, id, pub.FirstName, pub.LastName, pub.Birthday, pub.Gender, pub.Nation, pub.Party.Id)
 	return nil, err
 }
 
 func (p *PublicStorage) GetByIdPublic(id *v.ById) (*pb.Public, error) {
 		query := `
-			SELECT id, name
-			FROM public_, election_id, public_id
+			SELECT id, first_name, last_name, birthday, gender, nation, party_id
+			FROM public
 			WHERE id = $1
 		`
 		row := p.db.QueryRow(query, id.Id)
 
 		var pub pb.Public
-		err := row.Scan(&p.Id,
-			&p.Election.Id,
-			&p.Public.Id)
+		err := row.Scan(&pub.Id,
+			&pub.FirstName,
+			&pub.LastName,
+			&pub.Birthday,
+			&pub.Gender,
+			&pub.Nation,
+			&pub.Party.Id)
 		if err != nil {
 			return nil, err
 		}
 
-		return &p, nil
+		return &pub, nil
 }
 
-func (p *PublicStorage) GetAllPublic(*v.Void) (*pb.GetAllPublic, error) {
-	ps := &pb.GetAllPublic{}
-	row, err := p.db.Query("select id, election_id, public_id from public_")
+func (p *PublicStorage) GetAllPublic(_ *v.Void) (*pb.GetAllPublic, error) {
+	pubs := &pb.GetAllPublic{}
+	row, err := p.db.Query("select id, first_name, last_name, birthday, gender, nation, party_id from public")
 	if err != nil {
 		return nil, err
 	}
 	for row.Next() {
-		pub := &p.CreatePublic{}
-		err = row.Scan(&p.Id, &p.Election.Id, &p.Public.Id)
+		pub := &pb.Public{}
+		err = row.Scan(&pub.Id, &pub.FirstName, &pub.LastName, &pub.Birthday, &pub.Gender, &pub.Nation, &pub.Party.Id)
 		if err != nil {
 			return nil, err
 		}
-		ps.Publics = append(ps.Publics, p)
+		pubs.Publics = append(pubs.Publics, pub)
 	}
-	return users, nil
+	return pubs, nil
 }
 
-func (pub *PublicStorage) UpdatePublic(p *pb.Public) (*v.Void, error) {
+func (p *PublicStorage) UpdatePublic(pub *pb.Public) (*v.Void, error) {
 	query := `
 		UPDATE public_
-		SET election_id = $2, public_id = $3 
+		SET first_name = $2, last_name = $3, birthday = $4, gender = $5, nation = $6, party_id = $6
 		WHERE id = $1 
 	`
-	_, err := p.db.Exec(query, p.Id, p.Election.Id, p.Public.Id)
+	_, err := p.db.Exec(query, pub.Id, pub.FirstName, pub.LastName, pub.Birthday, pub.Gender, pub.Nation, pub.Party.Id)
 	return nil, err
 }
 
-func (p *PublicStorage) Delete(id *v.ById) (*v.Void, error) {
+func (p *PublicStorage) DeletePublic(id *v.ById) (*v.Void, error) {
 	query := `
-		delete from public_ where id = $1
+		delete from public where id = $1
 	`
 	_, err := p.db.Exec(query, id.Id)
 	return nil, err
