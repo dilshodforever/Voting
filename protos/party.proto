@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "genprotos/party";
+option go_package = "genprotos/";
 
 package protos;
 import "election.proto" ;

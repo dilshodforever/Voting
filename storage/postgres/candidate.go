@@ -2,9 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	v "root/genprotos/election"
-	cn "root/genprotos/candidate"
-
+	cn "root/genprotos"
 	"github.com/google/uuid"
 )
 
@@ -16,17 +14,17 @@ func NewCandidateStorage(db *sql.DB) *CandidateStorage {
 	return &CandidateStorage{db: db}
 }
 
-func (p *CandidateStorage) CreateCandidate(cn *cn.Candidate) (*v.Void, error) {
+func (p *CandidateStorage) CreateCandidate(cn *cn.Candidate) (*cn.Void, error) {
 	id := uuid.NewString()
 	query := `
 		INSERT INTO candidate (id, election_id, party_id, public_id, date)
 		VALUES ($1, $2, $3, $4, $5)
 	`
-	_, err := p.db.Exec(query, id, cn.Election, cn.Public, cn.Party, cn.Date)
+	_, err := p.db.Exec(query, id, cn.Election.Id, cn.Public.Id, cn.Party.Id, cn.Date)
 	return nil, err
 }
 
-func (p *CandidateStorage) GetByIdCandidate(id *v.ById) (*cn.Candidate, error) {
+func (p *CandidateStorage) GetByIdCandidate(id *cn.ById) (*cn.Candidate, error) {
 		query := `
 			SELECT id, election_id, party_id, public_id, date
 			FROM candidate
@@ -35,9 +33,10 @@ func (p *CandidateStorage) GetByIdCandidate(id *v.ById) (*cn.Candidate, error) {
 		row := p.db.QueryRow(query, id.Id)
 
 		var can cn.Candidate
-		err := row.Scan(&can.Election,
-			&can.Party,
-			&can.Public)
+		err := row.Scan(&can.Election.Id,
+			&can.Party.Id,
+			&can.Public.Id,
+			&can.Date)
 		if err != nil {
 			return nil, err
 		}
@@ -45,7 +44,7 @@ func (p *CandidateStorage) GetByIdCandidate(id *v.ById) (*cn.Candidate, error) {
 		return &can, nil
 }
 
-func (p *CandidateStorage) GetAllCandidate(*v.Void) (*cn.GetAllCandidate, error) {
+func (p *CandidateStorage) GetAllCandidate(*cn.Void) (*cn.GetAllCandidate, error) {
 	cans := &cn.GetAllCandidate{}
 	row, err := p.db.Query("select id, election_id, party_id, public_id, date from candidate")
 	if err != nil {
@@ -53,7 +52,7 @@ func (p *CandidateStorage) GetAllCandidate(*v.Void) (*cn.GetAllCandidate, error)
 	}
 	for row.Next() {
 		can := &cn.Candidate{}
-		err = row.Scan(&can.Election, &can.Party, &can.Public)
+		err = row.Scan(&can.Election.Id, &can.Party.Id, &can.Public.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -62,17 +61,17 @@ func (p *CandidateStorage) GetAllCandidate(*v.Void) (*cn.GetAllCandidate, error)
 	return cans, nil
 }
 
-func (p *CandidateStorage) UpdateCandidate(cn *cn.Candidate) (*v.Void, error) {
+func (p *CandidateStorage) UpdateCandidate(cn *cn.Candidate) (*cn.Void, error) {
 	query := `
 		UPDATE candidate
 		SET election_id=$1, party_id=$2, public_id=$3, date=$4
 		WHERE id = $5
 	`
-	_, err := p.db.Exec(query,  cn.Election, cn.Party, cn.Public)
+	_, err := p.db.Exec(query,  cn.Election.Id, cn.Party.Id, cn.Public.Id)
 	return nil, err
 }
 
-func (p *CandidateStorage) Delete(id *v.ById) (*v.Void, error) {
+func (p *CandidateStorage) Delete(id *cn.ById) (*cn.Void, error) {
 	query := `
 		delete from candidate where id = $1
 	`

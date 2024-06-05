@@ -11,10 +11,14 @@ import (
 
 type Storage struct {
 	Db      *sql.DB
-	Products storage.Product
-	Users    storage.User
-	Baskets  storage.Election
+
+	Candidates storage.Candidate
+	Elections storage.Election
+	PublicVotes storage.PublicVote
+
+	Votes storage.Vote
 }
+
 
 func NewPostgresStorage() (storage.InitRoor, error) {
 	config:=config.Load()
@@ -30,31 +34,38 @@ func NewPostgresStorage() (storage.InitRoor, error) {
 	if err != nil {
 		return nil, err
 	}
-	// return &Storage{Db: db}, err
+	 return &Storage{Db: db}, err
 
 }
 
-// func (s *Storage) Product() storage.Product {
-// 	if s.Products == nil {
-// 		s.Products = &ProductStorage{s.Db}
-// 	}
-// 	return s.Products
-// }
 
-// func (s *Storage) User() storage.User {
-// 	if s.Users == nil {
-// 		s.Users =&UserStorage{s.Db}
-// 	}
-// 	return s.Users
-// }
+func (s *Storage) Candidate() storage.Candidate {
+	if s.Candidates == nil {
+		s.Candidates =&CandidateStorage{s.Db}
+	}
+	return s.Candidates
+}
 
 
 
-// func (s *Storage) Basket() storage.Election {
-// 	if s.Baskets == nil {
-// 		s.Baskets = &ElectionStorage{s.Db}
-// 	}
-// 	return s.Baskets
-// }
+func (s *Storage) Election() storage.Election {
+	if s.Elections == nil {
+		s.Elections = &ElectionStorage{s.Db}
+	}
+	return s.Elections
+}
 
+func (s *Storage) PublicVote() storage.PublicVote {
+	if s.PublicVotes == nil {
+		s.PublicVotes= &PublicVoteStorage{s.Db}
+	}
+	return s.PublicVotes
+}
+
+func (s *Storage) Vote() storage.Vote {
+	if s.Votes == nil {
+		s.Votes= &VoteStorage{s.Db}
+	}
+	return s.Votes
+}
 

@@ -2,8 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	v "root/genprotos/election"
-	pb "root/genprotos/vote"
+	pb "root/genprotos"
 
 	"github.com/google/uuid"
 )
@@ -16,25 +15,25 @@ func NewVoteStorage(db *sql.DB) *VoteStorage {
 	return &VoteStorage{db: db}
 }
 
-func (v *VoteStorage) CreateVote(vote *pb.Vote) (*v.Void, error) {
+func (pb *VoteStorage) CreateVote(vote *pb.Vote) (*pb.Void, error) {
 	id := uuid.NewString()
 	query := `
 		INSERT INTO vote (id, candidate_id, data)
 		VALUES ($1, $2, $3)
 	`
-	_, err := v.db.Exec(query, id, vote.Candidate.Id, vote.Date)
+	_, err := pb.db.Exec(query, id, vote.Candidate.Id, vote.Date)
 	return nil, err
 }
 
-func (v *VoteStorage) GetByIdVote(id *v.ById) (*pb.Vote, error) {
+func (p *VoteStorage) GetByIdVote(id *pb.ById) (*pb.Vote, error) {
 	query := `
 			SELECT id, candidate_id, data
 			FROM vote
 			WHERE id = $1
 		`
-	row := v.db.QueryRow(query, id.Id)
+	row := p.db.QueryRow(query, id.Id)
 
-	var vote pb.Vote
+	vote:=pb.Vote{}
 	err := row.Scan(&vote.Id,
 		&vote.Candidate.Id,
 		&vote.Date)
@@ -45,9 +44,9 @@ func (v *VoteStorage) GetByIdVote(id *v.ById) (*pb.Vote, error) {
 	return &vote, nil
 }
 
-func (v *VoteStorage) GetAllVote(_ *v.Void) (*pb.GetAllVote, error) {
+func (p *VoteStorage) GetAllVote(_ *pb.Void) (*pb.GetAllVote, error) {
 	votes := &pb.GetAllVote{}
-	row, err := v.db.Query("select id, candidate_id, data from vote")
+	row, err := p.db.Query("select id, candidate_id, data from vote")
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +61,7 @@ func (v *VoteStorage) GetAllVote(_ *v.Void) (*pb.GetAllVote, error) {
 	return votes, nil
 }
 
-func (p *VoteStorage) UpdateVote(vote *pb.Vote) (*v.Void, error) {
+func (p *VoteStorage) UpdateVote(vote *pb.Vote) (*pb.Void, error) {
 	query := `
 		UPDATE Vote_
 		SET candidate_id = $2, data = $3
@@ -72,10 +71,10 @@ func (p *VoteStorage) UpdateVote(vote *pb.Vote) (*v.Void, error) {
 	return nil, err
 }
 
-func (v *VoteStorage) DeleteVote(id *v.ById) (*v.Void, error) {
+func (pb *VoteStorage) DeleteVote(id *pb.ById) (*pb.Void, error) {
 	query := `
 		delete from vote where id = $1
 	`
-	_, err := v.db.Exec(query, id.Id)
+	_, err := pb.db.Exec(query, id.Id)
 	return nil, err
 }

@@ -2,8 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	v "root/genprotos/election"
-	pb "root/genprotos/public_vote"
+	pb "root/genprotos"
 
 	"github.com/google/uuid"
 )
@@ -16,7 +15,7 @@ func NewPublicVoteStorage(db *sql.DB) *PublicVoteStorage {
 	return &PublicVoteStorage{db: db}
 }
 
-func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*v.Void, error) {
+func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*pb.Void, error) {
 	id := uuid.NewString()
 	query := `
 		INSERT INTO public_vote (id, election_id, public_id)
@@ -26,7 +25,7 @@ func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*v.Void, err
 	return nil, err
 }
 
-func (p *PublicVoteStorage) GetByIdPublicVote(id *v.ById) (*pb.PublicVote, error) {
+func (p *PublicVoteStorage) GetByIdPublicVote(id *pb.ById) (*pb.PublicVote, error) {
 		query := `
 			SELECT id, election_id, public_id
 			FROM public_vote
@@ -45,7 +44,7 @@ func (p *PublicVoteStorage) GetByIdPublicVote(id *v.ById) (*pb.PublicVote, error
 		return &pVote, nil
 }
 
-func (p *PublicVoteStorage) GetAllPublicVote(_ *v.Void) (*pb.GetAllPublicVote, error) {
+func (p *PublicVoteStorage) GetAllPublicVote(_ *pb.Void) (*pb.GetAllPublicVote, error) {
 	pVotes := &pb.GetAllPublicVote{}
 	row, err := p.db.Query("select id, election_id, public_id from public_vote")
 	if err != nil {
@@ -62,7 +61,7 @@ func (p *PublicVoteStorage) GetAllPublicVote(_ *v.Void) (*pb.GetAllPublicVote, e
 	return pVotes, nil
 }
 
-func (p *PublicVoteStorage) UpdatePublicVote(pVote *pb.PublicVote) (*v.Void, error) {
+func (p *PublicVoteStorage) UpdatePublicVote(pVote *pb.PublicVote) (*pb.Void, error) {
 	query := `
 		UPDATE public_vote
 		SET election_id = $2, public_id = $3 
@@ -72,7 +71,7 @@ func (p *PublicVoteStorage) UpdatePublicVote(pVote *pb.PublicVote) (*v.Void, err
 	return nil, err
 }
 
-func (p *PublicVoteStorage) DeletePublicVote(id *v.ById) (*v.Void, error) {
+func (p *PublicVoteStorage) DeletePublicVote(id *pb.ById) (*pb.Void, error) {
 	query := `
 		delete from public_vote where id = $1
 	`

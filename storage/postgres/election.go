@@ -2,9 +2,8 @@ package postgres
 
 import (
 	"database/sql"
-	el "root/genprotos/election"
 	"github.com/google/uuid"
-	v "root/genprotos/election"
+	pb "root/genprotos"
 )
 
 type ElectionStorage struct {
@@ -15,16 +14,16 @@ func NewElectionStorage(db *sql.DB) *ElectionStorage {
 	return &ElectionStorage{db: db}
 }
             
-func (bc *ElectionStorage) CreateElection(el *el.Election ) (*el.Void,error){
+func (bc *ElectionStorage) CreateElection(pb *pb.Election ) (*pb.Void,error){
 	id:=uuid.NewString()
 	_, err:=bc.db.Exec(`insert into election(id, name, date) 
 						values($1, $2)`,
-						id, el.Name, el.Date)
+						id, pb.Name, pb.Date)
 	return nil,err
 }
 
 
-func (p *ElectionStorage) GetByIdElection(id *v.ById) (*el.Election, error) {
+func (p *ElectionStorage) GetByIdElection(id *pb.ById) (*pb.Election, error) {
 	query := `
 		SELECT id, name, date
 		FROM election
@@ -32,7 +31,7 @@ func (p *ElectionStorage) GetByIdElection(id *v.ById) (*el.Election, error) {
 	`
 	row := p.db.QueryRow(query, id.Id)
 
-	var elec el.Election
+	var elec pb.Election
 	err := row.Scan(&elec.Id,
 		&elec.Name,
 		&elec.Date)
@@ -43,14 +42,14 @@ func (p *ElectionStorage) GetByIdElection(id *v.ById) (*el.Election, error) {
 	return &elec, nil
 }
 
-func (p *ElectionStorage) GetAllElection(*v.Void) (*el.GetAllElection, error) {
-elecs := &el.GetAllElection{}
+func (p *ElectionStorage) GetAllElection(*pb.Void) (*pb.GetAllElection, error) {
+elecs := &pb.GetAllElection{}
 row, err := p.db.Query("select id, name, date from election")
 if err != nil {
 	return nil, err
 }
 for row.Next() {
-	elec := &el.Election{}
+	elec := &pb.Election{}
 	err = row.Scan(&elec.Id, &elec.Name, &elec.Date)
 	if err != nil {
 		return nil, err
@@ -60,17 +59,17 @@ for row.Next() {
 return elecs, nil
 }
 
-func (p *ElectionStorage) UpdateElection(el *el.Election) (*v.Void, error) {
+func (p *ElectionStorage) UpdateElection(pb *pb.Election) (*pb.Void, error) {
 query := `
 	UPDATE election
 	SET  name=$1, date=$2
 	WHERE id = $3
 `
-_, err := p.db.Exec(query,  el.Name, el.Date)
+_, err := p.db.Exec(query,  pb.Name, pb.Date)
 return nil, err
 }
 
-func (p *ElectionStorage) DeleteElection(id *v.ById) (*v.Void, error) {
+func (p *ElectionStorage) DeleteElection(id *pb.ById) (*pb.Void, error) {
 query := `
 	delete from election  where id = $1
 `

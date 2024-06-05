@@ -2,8 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	v "root/genprotos/election"
-	pb "root/genprotos/party"
+	pb "root/genprotos"
 
 	"github.com/google/uuid"
 )
@@ -16,7 +15,7 @@ func NewPartyStorage(db *sql.DB) *PartyStorage {
 	return &PartyStorage{db: db}
 }
 
-func (p *PartyStorage) CreateParty(party *pb.Party) (*v.Void, error) {
+func (p *PartyStorage) CreateParty(party *pb.Party) (*pb.Void, error) {
 	id := uuid.NewString()
 	query := `
 		INSERT INTO party (id, name, slogan, open_date, description)
@@ -26,7 +25,7 @@ func (p *PartyStorage) CreateParty(party *pb.Party) (*v.Void, error) {
 	return nil, err
 }
 
-func (p *PartyStorage) GetByIdParty(id *v.ById) (*pb.Party, error) {
+func (p *PartyStorage) GetByIdParty(id *pb.ById) (*pb.Party, error) {
 		query := `
 			SELECT id, name, slogan, open_date, description
 			FROM party
@@ -47,7 +46,7 @@ func (p *PartyStorage) GetByIdParty(id *v.ById) (*pb.Party, error) {
 		return &party, nil
 }
 
-func (p *PartyStorage) GetAllParty(_ *v.Void) (*pb.GetAllParty, error) {
+func (p *PartyStorage) GetAllParty(_ *pb.Void) (*pb.GetAllParty, error) {
 	partys := &pb.GetAllParty{}
 	row, err := p.db.Query("select id, name, slogan, open_date, description from party")
 	if err != nil {
@@ -65,7 +64,7 @@ func (p *PartyStorage) GetAllParty(_ *v.Void) (*pb.GetAllParty, error) {
 	return partys, nil
 }
 
-func (p *PartyStorage) UpdateParty(party *pb.Party) (*v.Void, error) {
+func (p *PartyStorage) UpdateParty(party *pb.Party) (*pb.Void, error) {
 	query := `
 		UPDATE party
 		SET name = $2, open_date = $3, description = $4
@@ -75,7 +74,7 @@ func (p *PartyStorage) UpdateParty(party *pb.Party) (*v.Void, error) {
 	return nil, err
 }
 
-func (p *PartyStorage) DeleteParty(id *v.ById) (*v.Void, error) {
+func (p *PartyStorage) DeleteParty(id *pb.ById) (*pb.Void, error) {
 	query := `
 		delete from party where id = $1
 	`

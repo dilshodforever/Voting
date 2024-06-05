@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "genprotos/vote";
+option go_package = "genprotos/";
 
 package protos;
 
@@ -19,7 +19,6 @@ service VoteService {
 message Vote {
     string id = 1;
     Candidate candidate =2;
-    string date =3;
 }
 
 message GetAllVote{
