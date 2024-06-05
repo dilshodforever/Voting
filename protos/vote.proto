@@ -11,8 +11,9 @@ service VoteService {
     rpc CreateVote(Vote) returns (Void) {}
     rpc DeleteVote(ById) returns (Void) {}
     rpc UpdateVote(Vote) returns(Void){}
-    rpc GetByIdVote(ById) returns (GetAllVote) {}
-  }
+    rpc GetByIdVote(ById) returns (Vote) {}
+    rpc GetAllVotes(Void) returns (GetAllVote) {}
+}
 
   
 message Vote {

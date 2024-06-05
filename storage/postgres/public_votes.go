@@ -2,42 +2,80 @@ package postgres
 
 import (
 	"database/sql"
-	user "root/genprotos/user"
+	v "root/genprotos/election"
+	pb "root/genprotos/public_vote"
+
 	"github.com/google/uuid"
 )
 
-type UserStorage struct {
+type PublicVoteStorage struct {
 	db *sql.DB
 }
 
-func NewUserStorage(db *sql.DB) *UserStorage {
-	return &UserStorage{db: db}
+func NewPublicVoteStorage(db *sql.DB) *PublicVoteStorage {
+	return &PublicVoteStorage{db: db}
 }
-func (u *UserStorage) CreateUser(user *user.CreateUser) (*user.UserREsponse,error) {
+
+func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*v.Void, error) {
 	id := uuid.NewString()
 	query := `
-		INSERT INTO Users (id, name, email)
+		INSERT INTO public_vote (id, election_id, public_id)
 		VALUES ($1, $2, $3)
 	`
-	_, err := u.db.Exec(query, id, user.Name,user.Email)
-	return nil,err
+	_, err := p.db.Exec(query, id, pVote.Election.Id, pVote.Public.Id)
+	return nil, err
 }
 
-func (u *UserStorage) GetAllUser(fl *user.Filter) (*user.GetAllUsers,error) {
-	users:=&user.GetAllUsers{}
-	row, err:=u.db.Query("select name, email from users where deleted_at=0")
-	if err!=nil{
-		return nil, err
-	}
-	for row.Next(){
-		user:=&user.CreateUser{}
-		err=row.Scan(&user.Name, &user.Email)
-		if err!=nil{
+func (p *PublicVoteStorage) GetByIdPublicVote(id *v.ById) (*pb.PublicVote, error) {
+		query := `
+			SELECT id, name
+			FROM public_vote, election_id, public_id
+			WHERE id = $1
+		`
+		row := p.db.QueryRow(query, id.Id)
+
+		var pVote pb.PublicVote
+		err := row.Scan(&pVote.Id,
+			&pVote.Election.Id,
+			&pVote.Public.Id)
+		if err != nil {
 			return nil, err
 		}
-		users.Users=append(users.Users, user)
-	}
-	return users, nil
+
+		return &pVote, nil
 }
 
+func (p *PublicVoteStorage) GetAllPublicVote(_ *v.Void) (*pb.GetAllPublicVote, error) {
+	pVotes := &pb.GetAllPublicVote{}
+	row, err := p.db.Query("select id, election_id, public_id from public_vote")
+	if err != nil {
+		return nil, err
+	}
+	for row.Next() {
+		pVote := &pb.PublicVote{}
+		err = row.Scan(&pVote.Id, &pVote.Election.Id, &pVote.Public.Id)
+		if err != nil {
+			return nil, err
+		}
+		pVotes.PublicVotes = append(pVotes.PublicVotes, pVote)
+	}
+	return pVotes, nil
+}
 
+func (p *PublicVoteStorage) UpdatePublicVote(pVote *pb.PublicVote) (*v.Void, error) {
+	query := `
+		UPDATE public_vote
+		SET election_id = $2, public_id = $3 
+		WHERE id = $1 
+	`
+	_, err := p.db.Exec(query, pVote.Id, pVote.Election.Id, pVote.Public.Id)
+	return nil, err
+}
+
+func (p *PublicVoteStorage) Delete(id *v.ById) (*v.Void, error) {
+	query := `
+		delete from public_vote where id = $1
+	`
+	_, err := p.db.Exec(query, id.Id)
+	return nil, err
+}

@@ -1,56 +1,81 @@
 package postgres
 
-// import (
-// 	"database/sql"
-// 	"github.com/google/uuid"
-// )
+import (
+	"database/sql"
+	v "root/genprotos/election"
+	pb "root/genprotos/public"
 
-// type CategoryStorage struct {
-// 	db *sql.DB
-// }
+	"github.com/google/uuid"
+)
 
-// func (c *CategoryStorage) Create(cat *model.Category) error {
-// 	id := uuid.NewString()
-// 	query := `
-// 		INSERT INTO category (id, name)
-// 		VALUES ($1, $2)
-// 	`
-// 	_, err := c.db.Exec(query, id, cat.Name)
-// 	return err
-// }
+type PublicStorage struct {
+	db *sql.DB
+}
 
-// func (c *CategoryStorage) Get(db *sql.DB, id string) (*model.Category, error) {
-// 	query := `
-// 		SELECT id, name
-// 		FROM Category
-// 		WHERE id = $1
-// 	`
-// 	row := db.QueryRow(query, id)
+func NewPublicStorage(db *sql.DB) *PublicStorage {
+	return &PublicStorage{db: db}
+}
 
-// 	var cat model.Category
-// 	err := row.Scan(&cat.ID,
-// 		&cat.Name)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (p *PublicStorage) CreatePublic(pub *pb.Public) (*v.Void, error) {
+	id := uuid.NewString()
+	query := `
+		INSERT INTO public_ (id, election_id, public_id)
+		VALUES ($1, $2, $3)
+	`
+	_, err := p.db.Exec(query, id, p.Election.Id, p.Public.Id)
+	return nil, err
+}
 
-// 	return &cat, nil
-// }
+func (p *PublicStorage) GetByIdPublic(id *v.ById) (*pb.Public, error) {
+		query := `
+			SELECT id, name
+			FROM public_, election_id, public_id
+			WHERE id = $1
+		`
+		row := p.db.QueryRow(query, id.Id)
 
-// func (c *CategoryStorage) Update(db *sql.DB, category *model.Category) error {
-// 	query := `
-// 		UPDATE category
-// 		SET name = $2, updated_at = now()
-// 		WHERE id = $1 
-// 	`
-// 	_, err := db.Exec(query, category.ID, category.Name)
-// 	return err
-// }
+		var pub pb.Public
+		err := row.Scan(&p.Id,
+			&p.Election.Id,
+			&p.Public.Id)
+		if err != nil {
+			return nil, err
+		}
 
-// func (c *CategoryStorage) Delete(db *sql.DB, id string) error {
-// 	query := `
-// 		delete from category where id = $1 
-// 	`
-// 	_, err := db.Exec(query, id)
-// 	return err
-// }
+		return &p, nil
+}
+
+func (p *PublicStorage) GetAllPublic(*v.Void) (*pb.GetAllPublic, error) {
+	ps := &pb.GetAllPublic{}
+	row, err := p.db.Query("select id, election_id, public_id from public_")
+	if err != nil {
+		return nil, err
+	}
+	for row.Next() {
+		pub := &p.CreatePublic{}
+		err = row.Scan(&p.Id, &p.Election.Id, &p.Public.Id)
+		if err != nil {
+			return nil, err
+		}
+		ps.Publics = append(ps.Publics, p)
+	}
+	return users, nil
+}
+
+func (pub *PublicStorage) UpdatePublic(p *pb.Public) (*v.Void, error) {
+	query := `
+		UPDATE public_
+		SET election_id = $2, public_id = $3 
+		WHERE id = $1 
+	`
+	_, err := p.db.Exec(query, p.Id, p.Election.Id, p.Public.Id)
+	return nil, err
+}
+
+func (p *PublicStorage) Delete(id *v.ById) (*v.Void, error) {
+	query := `
+		delete from public_ where id = $1
+	`
+	_, err := p.db.Exec(query, id.Id)
+	return nil, err
+}

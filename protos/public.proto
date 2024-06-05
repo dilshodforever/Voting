@@ -11,8 +11,9 @@ service PublicService {
     rpc CreatePublic(Public) returns (Void) {}
     rpc DeletePublic(ById) returns (Void) {}
     rpc UpdatePublic(Public) returns(Void){}
-    rpc GetByIdPublic(ById) returns (GetAllPublic) {}
-  }
+    rpc GetByIdPublic(ById) returns (Public) {}
+    rpc GetAllPublics(Void) returns (GetAllPublic) {}
+}
 
 message Public {
     string id = 1;

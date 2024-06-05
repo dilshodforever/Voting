@@ -1,9 +1,12 @@
 package storage
 
 import (
-	basket "root/genprotos/basket"
-	pr "root/genprotos/product"
-	user "root/genprotos/user"
+	pbp "root/genprotos/public"
+	pbp_v "root/genprotos/public_vote"
+	pbv "root/genprotos/vote"
+	pbe "root/genprotos/election"
+	pbpt "root/genprotos/party"
+	pbc "root/genprotos/candidate"
 )
 
 type InitRoor interface {

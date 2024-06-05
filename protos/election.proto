@@ -8,8 +8,10 @@ service ElectionService {
     rpc CreateElection(Election) returns (Void) {}
     rpc DeleteElection(ById) returns (Void) {}
     rpc UpdateElection(Election) returns(Void){}
-    rpc GetByIdElection(ById) returns (GetAllElection) {}
+    rpc GetByIdElection(ById) returns (Election) {}
+    rpc GetAllElections(Void) returns (GetAllElection) {}
 }
+
 message Void{}
   
 message ById{
@@ -22,5 +24,5 @@ message Election {
 }
 
 message GetAllElection{
-  repeated Election elections=1;
+    repeated Election elections=1;
 }

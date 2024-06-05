@@ -9,7 +9,8 @@ service PartyService {
     rpc CreateParty(Party) returns (Void) {}
     rpc DeleteParty(ById) returns (Void) {}
     rpc UpdateParty(Party) returns(Void){}
-    rpc GetByIdParty(ById) returns (GetAllPartys) {}
+    rpc GetByIdParty(ById) returns (Party) {}
+    rpc GetAllPartys(Void) returns (GetAllParty) {}
 }
 
 message Party {
@@ -20,6 +21,6 @@ message Party {
     string description =5;
 }
 
-message GetAllPartys{
+message GetAllParty{
   repeated Party partys=1;
 }

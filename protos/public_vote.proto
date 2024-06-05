@@ -11,8 +11,9 @@ service PublicVoteService {
     rpc CreatePublicVote(PublicVote) returns (Void) {}
     rpc DeletePublicVote(ById) returns (Void) {}
     rpc UpdatePublicVote(PublicVote) returns(Void){}
-    rpc GetByIdPublicVote(ById) returns (GetAllPublucVotes) {}
-  }
+    rpc GetByIdPublicVote(ById) returns (PublicVote) {}
+    rpc GetAllPublucVotes(Void) returns (GetAllPublicVote) {}
+}
 
 message PublicVote {
     string id = 1;
@@ -20,6 +21,6 @@ message PublicVote {
     Public public =3;
 }
 
-message GetAllPublucVotes{
+message GetAllPublicVote{
   repeated PublicVote publicVotes=1;
 }

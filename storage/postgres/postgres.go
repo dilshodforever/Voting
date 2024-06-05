@@ -30,31 +30,31 @@ func NewPostgresStorage() (storage.InitRoor, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Storage{Db: db}, err
+	// return &Storage{Db: db}, err
 
 }
 
-func (s *Storage) Product() storage.Product {
-	if s.Products == nil {
-		s.Products = &ProductStorage{s.Db}
-	}
-	return s.Products
-}
+// func (s *Storage) Product() storage.Product {
+// 	if s.Products == nil {
+// 		s.Products = &ProductStorage{s.Db}
+// 	}
+// 	return s.Products
+// }
 
-func (s *Storage) User() storage.User {
-	if s.Users == nil {
-		s.Users =&UserStorage{s.Db}
-	}
-	return s.Users
-}
+// func (s *Storage) User() storage.User {
+// 	if s.Users == nil {
+// 		s.Users =&UserStorage{s.Db}
+// 	}
+// 	return s.Users
+// }
 
 
 
-func (s *Storage) Basket() storage.Election {
-	if s.Baskets == nil {
-		s.Baskets = &ElectionStorage{s.Db}
-	}
-	return s.Baskets
-}
+// func (s *Storage) Basket() storage.Election {
+// 	if s.Baskets == nil {
+// 		s.Baskets = &ElectionStorage{s.Db}
+// 	}
+// 	return s.Baskets
+// }
 
 
