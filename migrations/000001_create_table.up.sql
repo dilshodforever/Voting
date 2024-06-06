@@ -26,16 +26,16 @@ CREATE TABLE election (
 
 CREATE TABLE candidate (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    election_id UUID REFERENCES election(id),
-    public_id UUID,
+    election_id UUID  UNIQUE REFERENCES election(id),
+    public_id UUID  UNIQUE,
     party_id UUID
 );
 
 
 CREATE TABLE public_vote (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    election_id UUID REFERENCES election(id),
-    public_id UUID
+    election_id UUID  UNIQUE REFERENCES election(id),
+    public_id UUID UNIQUE
 );
 
 CREATE TABLE vote (

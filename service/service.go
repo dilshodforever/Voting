@@ -6,21 +6,14 @@ import (
 )
 
 type Service struct {
-	candidateService   *CandidateService
+	candidateService  *CandidateService
 	electionService   *ElectionService
-	partyService   *PartyService
-	publicVoteService   *PublicVoteService
-	publicService   *PublicService
-	voteService   *VoteService
+	publicVoteService *PublicVoteService
 }
 
 func InitServices(db *sql.DB) *Service {
 	candidate := NewCandidateService(postgres.NewCandidateStorage(db))
 	election := NewElectionService(postgres.NewElectionStorage(db))
-	party := NewPartyService(postgres.NewPartyStorage(db))
 	publicVote := NewPublicVoteService(postgres.NewPublicVoteStorage(db))
-	public := NewPublicService(postgres.NewPublicStorage(db))
-	vote := NewVoteService(postgres.NewVoteStorage(db))
-
-	return &Service{candidate, election, party, publicVote, public, vote}
+	return &Service{candidate, election, publicVote}
 }

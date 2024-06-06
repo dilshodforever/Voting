@@ -16,12 +16,27 @@ func NewPublicVoteStorage(db *sql.DB) *PublicVoteStorage {
 }
 
 func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*pb.Void, error) {
+	t, err:=p.db.Begin()
+	if err!=nil{
+		return nil, err
+	}
+	defer t.Commit()
 	id := uuid.NewString()
 	query := `
 		INSERT INTO public_vote (id, election_id, public_id)
 		VALUES ($1, $2, $3)
 	`
-	_, err := p.db.Exec(query, id, pVote.Election.Id, pVote.Public.Id)
+	_, err = t.Exec(query, id, pVote.Election.Id, pVote.Public.Id)
+	if err!=nil{
+		return nil, err
+	}
+	id = uuid.NewString()
+	query = `
+		INSERT INTO vote (id, candidate_id, data)
+		VALUES ($1, $2, $3)
+	`
+	_, err = t.Exec(query, id, pVote.Candidate.Id,)
+
 	return nil, err
 }
 

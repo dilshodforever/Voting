@@ -15,11 +15,13 @@ func NewCandidateStorage(db *sql.DB) *CandidateStorage {
 }
 
 func (p *CandidateStorage) CreateCandidate(cn *cn.Candidate) (*cn.Void, error) {
+
 	id := uuid.NewString()
 	query := `
 		INSERT INTO candidate (id, election_id, party_id, public_id, date)
 		VALUES ($1, $2, $3, $4, $5)
 	`
+
 	_, err := p.db.Exec(query, id, cn.Election.Id, cn.Public.Id, cn.Party.Id, cn.Date)
 	return nil, err
 }
@@ -71,7 +73,7 @@ func (p *CandidateStorage) UpdateCandidate(cn *cn.Candidate) (*cn.Void, error) {
 	return nil, err
 }
 
-func (p *CandidateStorage) Delete(id *cn.ById) (*cn.Void, error) {
+func (p *CandidateStorage) DeleteCandidate(id *cn.ById) (*cn.Void, error) {
 	query := `
 		delete from candidate where id = $1
 	`

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"log"
-	pb "root/genprotos/election"
+	pb "root/genprotos"
 	"root/storage/postgres"
 )
 

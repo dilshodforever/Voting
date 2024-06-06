@@ -15,12 +15,10 @@ type Storage struct {
 	Candidates storage.Candidate
 	Elections storage.Election
 	PublicVotes storage.PublicVote
-
-	Votes storage.Vote
 }
 
 
-func NewPostgresStorage() (storage.InitRoor, error) {
+func NewPostgresStorage() (storage.InitRoot, error) {
 	config:=config.Load()
 	con := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 						config.PostgresUser, config.PostgresPassword, 
@@ -60,12 +58,5 @@ func (s *Storage) PublicVote() storage.PublicVote {
 		s.PublicVotes= &PublicVoteStorage{s.Db}
 	}
 	return s.PublicVotes
-}
-
-func (s *Storage) Vote() storage.Vote {
-	if s.Votes == nil {
-		s.Votes= &VoteStorage{s.Db}
-	}
-	return s.Votes
 }
 

@@ -4,12 +4,10 @@ import (
 	pb "root/genprotos"
 )
 
-type InitRoor interface {
+type InitRoot interface {
 	Candidate() Candidate
 	Election() Election
 	PublicVote() PublicVote
-
-	Vote() Vote
 }
 
 type Candidate interface {
@@ -17,7 +15,7 @@ type Candidate interface {
 	GetByIdCandidate(id *pb.ById) (*pb.Candidate, error)
 	GetAllCandidate(*pb.Void) (*pb.GetAllCandidate, error)
 	UpdateCandidate(cn *pb.Candidate) (*pb.Void, error)
-	Delete(id *pb.ById) (*pb.Void, error)
+	DeleteCandidate(id *pb.ById) (*pb.Void, error)
 }
 
 type Election interface {
@@ -36,10 +34,3 @@ type PublicVote interface {
 	DeletePublicVote(id *pb.ById) (*pb.Void, error)
 }
 
-type Vote interface {
-	CreateVote(vote *pb.Vote) (*pb.Void, error)
-	GetByIdVote(id *pb.ById) (*pb.Vote, error)
-	GetAllVote(_ *pb.Void) (*pb.GetAllVote, error)
-	UpdateVote(vote *pb.Vote) (*pb.Void, error)
-	DeleteVote(id *pb.ById) (*pb.Void, error)
-}
