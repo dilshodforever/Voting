@@ -17,7 +17,7 @@ func NewElectionStorage(db *sql.DB) *ElectionStorage {
 func (bc *ElectionStorage) CreateElection(pb *pb.Election ) (*pb.Void,error){
 	id:=uuid.NewString()
 	_, err:=bc.db.Exec(`insert into election(id, name, date) 
-						values($1, $2)`,
+						values($1, $2, $3)`,
 						id, pb.Name, pb.Date)
 	return nil,err
 }

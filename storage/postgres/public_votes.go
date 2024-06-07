@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	pb "root/genprotos"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -32,9 +33,8 @@ func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*pb.Void, er
 	}
 	id = uuid.NewString()
 	query = `
-		INSERT INTO vote (id, candidate_id, data)
-		VALUES ($1, $2, $3)
-	`
+		INSERT INTO vote (id, candidate_id)
+		VALUES ($1, $2)`
 	_, err = t.Exec(query, id, pVote.Candidate.Id,)
 
 	return nil, err
@@ -49,12 +49,15 @@ func (p *PublicVoteStorage) GetByIdPublicVote(id *pb.ById) (*pb.PublicVote, erro
 		row := p.db.QueryRow(query, id.Id)
 
 		var pVote pb.PublicVote
+		var eid, pid string
 		err := row.Scan(&pVote.Id,
-			&pVote.Election.Id,
-			&pVote.Public.Id)
+			&eid,
+			&pid)
 		if err != nil {
 			return nil, err
 		}
+		pVote.Election.Id=eid
+		pVote.Public.Id=pid
 
 		return &pVote, nil
 }
@@ -67,10 +70,13 @@ func (p *PublicVoteStorage) GetAllPublicVote(_ *pb.Void) (*pb.GetAllPublicVote, 
 	}
 	for row.Next() {
 		pVote := &pb.PublicVote{}
-		err = row.Scan(&pVote.Id, &pVote.Election.Id, &pVote.Public.Id)
+		var eid, pid string
+		err = row.Scan(&pVote.Id, &eid, &pid)
 		if err != nil {
 			return nil, err
 		}
+		pVote.Election.Id=eid
+		pVote.Public.Id=pid
 		pVotes.PublicVotes = append(pVotes.PublicVotes, pVote)
 	}
 	return pVotes, nil
@@ -88,8 +94,8 @@ func (p *PublicVoteStorage) UpdatePublicVote(pVote *pb.PublicVote) (*pb.Void, er
 
 func (p *PublicVoteStorage) DeletePublicVote(id *pb.ById) (*pb.Void, error) {
 	query := `
-		delete from public_vote where id = $1
+		update  public_vote set delated_at=$1 where id = $2
 	`
-	_, err := p.db.Exec(query, id.Id)
+	_, err := p.db.Exec(query, id.Id, time.Now().Unix())
 	return nil, err
 }

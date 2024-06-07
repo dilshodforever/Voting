@@ -4,20 +4,20 @@ import (
 	"context"
 	"log"
 	pb "root/genprotos"
-	"root/storage/postgres"
+	"root/storage"
 )
 
 type ElectionService struct {
-	stg *postgres.ElectionStorage
+	stg storage.InitRoot
 	pb.UnimplementedElectionServiceServer
 }
 
-func NewElectionService(stg *postgres.ElectionStorage) *ElectionService {
+func NewElectionService(stg storage.InitRoot) *ElectionService {
 	return &ElectionService{stg: stg}
 }
 
 func (c *ElectionService) CreateElection(ctx context.Context, Election *pb.Election) (*pb.Void, error) {
-	v, err := c.stg.CreateElection(Election)
+	v, err := c.stg.Election().CreateElection(Election)
 	if err != nil {
 		log.Print(err)
 	}
@@ -25,7 +25,7 @@ func (c *ElectionService) CreateElection(ctx context.Context, Election *pb.Elect
 }
 
 func (c *ElectionService) GetAllElections(ctx context.Context, v *pb.Void) (*pb.GetAllElection, error) {
-	Elections, err := c.stg.GetAllElection(v)
+	Elections, err := c.stg.Election().GetAllElection(v)
 	if err != nil {
 		log.Print(err)
 	}
@@ -34,7 +34,7 @@ func (c *ElectionService) GetAllElections(ctx context.Context, v *pb.Void) (*pb.
 }
 
 func (c *ElectionService) GetByIdElection(ctx context.Context, id *pb.ById) (*pb.Election, error) {
-	prod, err := c.stg.GetByIdElection(id)
+	prod, err := c.stg.Election().GetByIdElection(id)
 	if err != nil {
 		log.Print(err)
 	}
@@ -43,7 +43,7 @@ func (c *ElectionService) GetByIdElection(ctx context.Context, id *pb.ById) (*pb
 }
 
 func (c *ElectionService) UpdateElection(ctx context.Context, Election *pb.Election) (*pb.Void, error) {
-	v, err := c.stg.UpdateElection(Election)
+	v, err := c.stg.Election().UpdateElection(Election)
 	if err != nil {
 		log.Print(err)
 	}
@@ -52,7 +52,7 @@ func (c *ElectionService) UpdateElection(ctx context.Context, Election *pb.Elect
 }
 
 func (c *ElectionService) DeleteElection(ctx context.Context, id *pb.ById) (*pb.Void, error) {
-	v, err := c.stg.DeleteElection(id)
+	v, err := c.stg.Election().DeleteElection(id)
 	if err != nil {
 		log.Print(err)
 	}

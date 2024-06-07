@@ -4,20 +4,20 @@ import (
 	"context"
 	"log"
 	pb "root/genprotos"
-	"root/storage/postgres"
+	"root/storage"
 )
 
 type CandidateService struct {
-	stg *postgres.CandidateStorage
+	stg storage.InitRoot
 	pb.UnimplementedCandidateServiceServer
 }
 
-func NewCandidateService(stg *postgres.CandidateStorage) *CandidateService {
+func NewCandidateService(stg storage.InitRoot) *CandidateService {
 	return &CandidateService{stg: stg}
 }
 
 func (c *CandidateService) CreateCandidate(ctx context.Context, Candidate *pb.Candidate) (*pb.Void, error) {
-	pb, err := c.stg.CreateCandidate(Candidate)
+	pb, err := c.stg.Candidate().CreateCandidate(Candidate)
 	if err != nil {
 		log.Print(err)
 	}
@@ -25,7 +25,7 @@ func (c *CandidateService) CreateCandidate(ctx context.Context, Candidate *pb.Ca
 }
 
 func (c *CandidateService) GetAllCandidates(ctx context.Context, pb *pb.Void) (*pb.GetAllCandidate, error) {
-	Candidates, err := c.stg.GetAllCandidate(pb)
+	Candidates, err := c.stg.Candidate().GetAllCandidate(pb)
 	if err != nil {
 		log.Print(err)
 	}
@@ -34,7 +34,7 @@ func (c *CandidateService) GetAllCandidates(ctx context.Context, pb *pb.Void) (*
 }
 
 func (c *CandidateService) GetByIdCandidate(ctx context.Context, id *pb.ById) (*pb.Candidate, error) {
-	prod, err := c.stg.GetByIdCandidate(id)
+	prod, err := c.stg.Candidate().GetByIdCandidate(id)
 	if err != nil {
 		log.Print(err)
 	}
@@ -43,7 +43,7 @@ func (c *CandidateService) GetByIdCandidate(ctx context.Context, id *pb.ById) (*
 }
 
 func (c *CandidateService) UpdateCandidate(ctx context.Context, Candidate *pb.Candidate) (*pb.Void, error) {
-	pb, err := c.stg.UpdateCandidate(Candidate)
+	pb, err := c.stg.Candidate().UpdateCandidate(Candidate)
 	if err != nil {
 		log.Print(err)
 	}
@@ -52,7 +52,7 @@ func (c *CandidateService) UpdateCandidate(ctx context.Context, Candidate *pb.Ca
 }
 
 func (c *CandidateService) DeleteCandidate(ctx context.Context, id *pb.ById) (*pb.Void, error) {
-	pb, err := c.stg.DeleteCandidate(id)
+	pb, err := c.stg.Candidate().DeleteCandidate(id)
 	if err != nil {
 		log.Print(err)
 	}
