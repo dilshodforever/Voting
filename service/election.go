@@ -24,7 +24,7 @@ func (c *ElectionService) CreateElection(ctx context.Context, Election *pb.Elect
 	return v, err
 }
 
-func (c *ElectionService) GetAllElections(ctx context.Context, v *pb.Void) (*pb.GetAllElection, error) {
+func (c *ElectionService) GetAllElections(ctx context.Context, v *pb.Election) (*pb.GetAllElection, error) {
 	Elections, err := c.stg.Election().GetAllElection(v)
 	if err != nil {
 		log.Print(err)

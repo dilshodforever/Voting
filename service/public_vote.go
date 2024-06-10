@@ -24,7 +24,7 @@ func (c *PublicVoteService) CreatePublicVote(ctx context.Context, publicVote *pb
 	return pb, err
 }
 
-func (c *PublicVoteService) GetAllPublicVotes(ctx context.Context, pb *pb.Void) (*pb.GetAllPublicVote, error) {
+func (c *PublicVoteService) GetAllPublicVotes(ctx context.Context, pb *pb.PublicVote) (*pb.GetAllPublicVote, error) {
 	publicVotes, err := c.stg.GetAllPublicVote(pb)
 	if err != nil {
 		log.Print(err)

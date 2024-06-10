@@ -28,7 +28,8 @@ CREATE TABLE candidate (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     election_id UUID  UNIQUE REFERENCES election(id),
     public_id UUID  UNIQUE,
-    party_id UUID
+    party_id UUID,
+    delated_at DEFAULT 0
 );
 
 

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	pb "root/genprotos"
 	"time"
 
@@ -17,8 +18,8 @@ func NewPublicVoteStorage(db *sql.DB) *PublicVoteStorage {
 }
 
 func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*pb.Void, error) {
-	t, err:=p.db.Begin()
-	if err!=nil{
+	t, err := p.db.Begin()
+	if err != nil {
 		return nil, err
 	}
 	defer t.Commit()
@@ -28,43 +29,54 @@ func (p *PublicVoteStorage) CreatePublicVote(pVote *pb.PublicVote) (*pb.Void, er
 		VALUES ($1, $2, $3)
 	`
 	_, err = t.Exec(query, id, pVote.Election.Id, pVote.Public.Id)
-	if err!=nil{
+	if err != nil {
 		return nil, err
 	}
 	id = uuid.NewString()
 	query = `
 		INSERT INTO vote (id, candidate_id)
 		VALUES ($1, $2)`
-	_, err = t.Exec(query, id, pVote.Candidate.Id,)
+	_, err = t.Exec(query, id, pVote.Candidate.Id)
 
 	return nil, err
 }
 
 func (p *PublicVoteStorage) GetByIdPublicVote(id *pb.ById) (*pb.PublicVote, error) {
-		query := `
+	query := `
 			SELECT id, election_id, public_id
 			FROM public_vote
 			WHERE id = $1
 		`
-		row := p.db.QueryRow(query, id.Id)
+	row := p.db.QueryRow(query, id.Id)
 
-		var pVote pb.PublicVote
-		var eid, pid string
-		err := row.Scan(&pVote.Id,
-			&eid,
-			&pid)
-		if err != nil {
-			return nil, err
-		}
-		pVote.Election.Id=eid
-		pVote.Public.Id=pid
+	var pVote pb.PublicVote
+	var eid, pid string
+	err := row.Scan(&pVote.Id,
+		&eid,
+		&pid)
+	if err != nil {
+		return nil, err
+	}
+	pVote.Election.Id = eid
+	pVote.Public.Id = pid
 
-		return &pVote, nil
+	return &pVote, nil
 }
 
-func (p *PublicVoteStorage) GetAllPublicVote(_ *pb.Void) (*pb.GetAllPublicVote, error) {
+func (p *PublicVoteStorage) GetAllPublicVote(pu *pb.PublicVote) (*pb.GetAllPublicVote, error) {
 	pVotes := &pb.GetAllPublicVote{}
-	row, err := p.db.Query("select id, election_id, public_id from public_vote")
+	count := 1
+	query := `select id, election_id, public_id from public_vote where delated_at=0`
+	var arr []interface{}
+	if len(pu.Election.Id) > 0 {
+		query += fmt.Sprintf(` and election_id=$%d`, count)
+		arr = append(arr, pu.Election.Id)
+	}
+	if len(pu.Public.Id) > 0 {
+		query += fmt.Sprintf(` and public_id=$%d`, count)
+		arr = append(arr, pu.Public.Id)
+	}
+	row, err := p.db.Query(query, arr...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +87,8 @@ func (p *PublicVoteStorage) GetAllPublicVote(_ *pb.Void) (*pb.GetAllPublicVote, 
 		if err != nil {
 			return nil, err
 		}
-		pVote.Election.Id=eid
-		pVote.Public.Id=pid
+		pVote.Election.Id = eid
+		pVote.Public.Id = pid
 		pVotes.PublicVotes = append(pVotes.PublicVotes, pVote)
 	}
 	return pVotes, nil

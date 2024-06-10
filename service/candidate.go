@@ -24,7 +24,7 @@ func (c *CandidateService) CreateCandidate(ctx context.Context, Candidate *pb.Ca
 	return pb, err
 }
 
-func (c *CandidateService) GetAllCandidates(ctx context.Context, pb *pb.Void) (*pb.GetAllCandidate, error) {
+func (c *CandidateService) GetAllCandidates(ctx context.Context, pb *pb.Candidate) (*pb.GetAllCandidate, error) {
 	Candidates, err := c.stg.Candidate().GetAllCandidate(pb)
 	if err != nil {
 		log.Print(err)

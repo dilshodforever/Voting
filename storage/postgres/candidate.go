@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	cn "root/genprotos"
 	"time"
 
@@ -48,23 +49,32 @@ func (p *CandidateStorage) GetByIdCandidate(id *cn.ById) (*cn.Candidate, error) 
 	return can, nil
 }
 
-func (p *CandidateStorage) GetAllCandidate(*cn.Void) (*cn.GetAllCandidate, error) {
+func (p *CandidateStorage) GetAllCandidate(ca *cn.Candidate) (*cn.GetAllCandidate, error) {
 	cans := &cn.GetAllCandidate{}
-	row, err := p.db.Query(`select  election_id, party_id, public_id from candidate
-						     where delated_at=0`)
+	count := 1
+	var arr []interface{}
+	query := `select  election_id, party_id, public_id from candidate
+	where delated_at=0`
+	if len(ca.Date) > 0 {
+		query += fmt.Sprintf(` and date=$%d`, count)
+		arr = append(arr, ca.Date)
+	}
+	row, err := p.db.Query(query, arr...)
 	if err != nil {
 		return nil, err
 	}
 	for row.Next() {
 		can := &cn.Candidate{}
-		var eid, pid, puid string
-		err = row.Scan(&eid, &pid, &puid)
+		eid := &cn.Election{}
+		pid := &cn.Party{}
+		puid := &cn.Public{}
+		err = row.Scan(&eid.Id, &pid.Id, &puid.Id)
 		if err != nil {
 			return nil, err
 		}
-		can.Election.Id = eid
-		can.Party.Id = pid
-		can.Public.Id = puid
+		can.Election = eid
+		can.Party = pid
+		can.Public = puid
 		cans.Candidates = append(cans.Candidates, can)
 	}
 	return cans, nil
